@@ -1,5 +1,4 @@
 import time
-from pprint import pprint
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 
@@ -25,6 +24,7 @@ def get_money():
 
 upgrades_dict = get_upgrades_menu()
 keys = list(upgrades_dict.keys())
+# keys = [key for (key, value) in upgrades_dict.items()]
 
 cookie = webdriver.find_element(By.ID, value="cookie")
 
@@ -47,4 +47,4 @@ while is_game_on:
     if time.time() > five_min:  # 300 seconds for 5 minutes
         is_game_on = False
         cps = webdriver.find_element(By.ID, value="cps")
-        print(f"{cps.text}")
+        print(cps.text)
