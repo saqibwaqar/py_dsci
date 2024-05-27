@@ -1,3 +1,5 @@
+from time import sleep
+
 import requests
 from bs4 import BeautifulSoup
 from selenium import webdriver
@@ -10,27 +12,14 @@ response = requests.get(url="https://appbrewery.github.io/Zillow-Clone/")
 
 soup = BeautifulSoup(response.text, "html.parser")
 
-li_list = soup.select(selector=".List-c11n-8-84-3-photo-cards li")
-anchor_tags = soup.select(selector=".List-c11n-8-84-3-photo-cards li .StyledPropertyCardDataArea-anchor")
+price_list = [span.get_text().replace("/mo", "").split("+")[0]
+              for span in soup.select(selector=".PropertyCardWrapper__StyledPriceLine")]
 
-print(li_list)
+weblinks = [anchor["href"] for anchor in
+            soup.select(selector=".StyledPropertyCardDataWrapper a")]
 
-price_list = [li.find(name="span", class_="PropertyCardWrapper__StyledPriceLine").get_text().split("+")[0].split("/")[0]
-              for li in
-              li_list if li.find(name="span", class_="PropertyCardWrapper__StyledPriceLine") is not None]
-print(price_list)
-print(len(price_list))
-
-href_list = [anchor.get("href") for anchor in anchor_tags]
-
-print(href_list)
-print(len(href_list))
-
-address_list = [anchor.find(name="address").get_text().strip().replace("|", "") for anchor in anchor_tags]
-print(address_list)
-print(len(address_list))
-
-#############part 1 done###################
+address_list = [address.get_text().strip().replace("|", "") for address in
+                soup.select(selector=".ListItem-c11n-8-84-3-StyledListCardWrapper a address")]
 
 chrome_options = webdriver.ChromeOptions()
 chrome_options.add_experimental_option(name="detach", value=True)
@@ -38,6 +27,8 @@ chrome_options.add_argument("--start-maximized")
 
 webdriver = webdriver.Chrome(options=chrome_options)
 webdriver.get(GOOGLE_FORM)
+
+sleep(3)
 
 for index in range(len(price_list)):
     address_input = webdriver.find_element(By.XPATH,
@@ -56,9 +47,9 @@ for index in range(len(price_list)):
         price_input).send_keys_to_element(price_input, price_list[index]).move_to_element(
         href_input).send_keys_to_element(
         href_input,
-        href_list[index]).perform()
+        weblinks[index]).perform()
 
-    # click submit button
+    # Click submit button
     submit = webdriver.find_element(By.CSS_SELECTOR, value=".NPEfkd.RveJvd.snByac")
     submit.click()
 
